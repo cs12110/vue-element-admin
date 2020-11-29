@@ -51,7 +51,7 @@
             <el-table-column align="center" prop="updatedAt" label="更新时间" show-overflow-tooltip sortable="custom">
               <template slot-scope="{row}">{{ row.updatedAt || '-' }}</template>
             </el-table-column>
-            <el-table-column align="center" label="操作">
+            <el-table-column align="center" width="150px" label="操作">
               <template slot-scope="scope">
                 <div class="operate-container">
                   <el-link v-permission="['system:user:edit']" class="operate-item" icon="el-icon-edit" @click="handleEdit(scope.row)">编辑</el-link>
@@ -72,7 +72,7 @@
         />
       </el-footer>
     </el-container>
-    <el-dialog :visible.sync="dialogVisible" width="600px" append-to-body>
+    <el-dialog :visible.sync="dialogVisible" width="600px" :close-on-click-modal="false" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
         <el-row>
           <el-col :span="12">

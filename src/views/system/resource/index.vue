@@ -44,11 +44,11 @@
                 {{ transType(row.type) }}
               </template>
             </el-table-column>
-            <el-table-column align="center" prop="path" label="路径" />
-            <el-table-column align="center" prop="component" label="组件" />
-            <el-table-column align="center" prop="permission" label="权限" />
+            <el-table-column align="center" prop="path" label="路径" show-overflow-tooltip />
+            <el-table-column align="center" prop="component" label="组件" show-overflow-tooltip />
+            <el-table-column align="center" prop="permission" label="权限" show-overflow-tooltip />
             <el-table-column align="center" prop="sortNumber" label="序号" />
-            <el-table-column align="center" label="操作">
+            <el-table-column align="center" width="150px" label="操作">
               <template slot-scope="scope">
                 <div class="operate-container">
                   <el-link
@@ -70,7 +70,7 @@
         </el-card>
       </el-main>
     </el-container>
-    <el-dialog :visible.sync="dialogVisible" width="600px" append-to-body>
+    <el-dialog :visible.sync="dialogVisible" width="600px" :close-on-click-modal="false" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
         <el-row>
           <el-col :span="24">
@@ -183,7 +183,11 @@ export default {
         permission: '',
         sortNumber: 0
       },
-      rules: {},
+      rules: {
+        name: [
+          { required: true, message: '名称不能为空', trigger: 'blur' }
+        ]
+      },
       typeOptions: [
         {
           value: 1,
@@ -263,20 +267,22 @@ export default {
     },
     submitForm() {
       this.$refs['form'].validate(valid => {
-        if (this.isSave) {
-          save(this.form).then(res => {
-            if (res.code === 0) {
-              this.dialogVisible = false
-              this.getList()
-            }
-          })
-        } else {
-          update(this.form).then(res => {
-            if (res.code === 0) {
-              this.dialogVisible = false
-              this.getList()
-            }
-          })
+        if (valid) {
+          if (this.isSave) {
+            save(this.form).then(res => {
+              if (res.code === 0) {
+                this.dialogVisible = false
+                this.getList()
+              }
+            })
+          } else {
+            update(this.form).then(res => {
+              if (res.code === 0) {
+                this.dialogVisible = false
+                this.getList()
+              }
+            })
+          }
         }
       })
     },

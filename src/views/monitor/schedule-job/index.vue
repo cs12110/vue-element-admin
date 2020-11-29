@@ -8,7 +8,7 @@
               <el-input v-model="queryParams.keyword" placeholder="请输入任务名称" clearable />
             </el-form-item>
             <el-form-item class="filter-item">
-              <el-input v-model="queryParams.beanName" placeholder="beanName" clearable />
+              <el-input v-model="queryParams.beanName" placeholder="Bean 名称" clearable />
             </el-form-item>
             <el-button size="small" type="primary" @click="query">查 询</el-button>
             <el-button size="small" @click="resetQueryForm">重 置</el-button>
@@ -43,7 +43,7 @@
           >
             <el-table-column :reserve-selection="true" type="selection" width="50" />
             <el-table-column align="center" prop="name" label="任务名称" show-overflow-tooltip />
-            <el-table-column align="center" prop="group" label="任务组" show-overflow-tooltip />
+            <!-- <el-table-column align="center" prop="group" label="任务组" show-overflow-tooltip /> -->
             <el-table-column
               align="center"
               prop="beanName"
@@ -78,9 +78,14 @@
             <el-table-column align="center" prop="updatedAt" label="更新时间" show-overflow-tooltip sortable="custom">
               <template slot-scope="{row}">{{ row.updatedAt || '-' }}</template>
             </el-table-column> -->
-            <el-table-column align="center" label="操作">
+            <el-table-column width="200px" align="center" label="操作">
               <template slot-scope="scope">
                 <div class="operate-container">
+                  <el-link
+                    class="operate-item"
+                    icon="el-icon-thumb"
+                    @click="handleRun(scope.row)"
+                  >执行</el-link>
                   <el-link
                     class="operate-item"
                     icon="el-icon-edit"
@@ -108,7 +113,7 @@
       </el-footer>
     </el-container>
 
-    <el-dialog :visible.sync="dialogVisible" width="600px" append-to-body>
+    <el-dialog :visible.sync="dialogVisible" width="600px" :close-on-click-modal="false" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
         <el-row>
           <el-col :span="24">
@@ -119,13 +124,13 @@
 
           <el-col :span="24">
             <el-form-item label="Bean" prop="beanName">
-              <el-input v-model="form.beanName" placeholder="bean名称" />
+              <el-input v-model="form.beanName" placeholder="Bean 名称" />
             </el-form-item>
           </el-col>
 
           <el-col :span="24">
             <el-form-item label="cron" prop="cron">
-              <el-input v-model="form.cron" placeholder="cron表达式" />
+              <el-input v-model="form.cron" placeholder="Cron 表达式" />
             </el-form-item>
           </el-col>
 
@@ -134,10 +139,10 @@
               <el-input v-model="form.params" placeholder="任务参数" />
             </el-form-item>
           </el-col>
-
+          <!--
           <el-col :span="12">
             <el-form-item label="组别" prop="group">
-              <el-select v-model="form.group" clearable placeholder="请选择类型">
+              <el-select v-model="form.group" clearable placeholder="请选择组别">
                 <el-option
                   v-for="item in groupOptions"
                   :key="item.value"
@@ -146,7 +151,7 @@
                 />
               </el-select>
             </el-form-item>
-          </el-col>
+          </el-col> -->
 
           <el-col :span="12">
             <el-form-item label="策略" prop="misfirePolicy">
@@ -163,7 +168,7 @@
 
           <el-col :span="12">
             <el-form-item label="并发" prop="allowConcurrent">
-              <el-select v-model="form.allowConcurrent" clearable placeholder="状态">
+              <el-select v-model="form.allowConcurrent" placeholder="并发">
                 <el-option
                   v-for="item in allowConcurrentOptions"
                   :key="item.value"
@@ -176,7 +181,7 @@
 
           <el-col :span="12">
             <el-form-item label="状态" prop="status">
-              <el-select v-model="form.status" clearable placeholder="状态">
+              <el-select v-model="form.status" placeholder="状态">
                 <el-option
                   v-for="item in statusOptions"
                   :key="item.value"
@@ -202,7 +207,7 @@
 </template>
 
 <script>
-import { page, get, save, update, del } from '@/api/system/schedule-job'
+import { page, get, save, update, del, run } from '@/api/system/schedule-job'
 import permission from '@/directive/permission/index.js'
 import Pagination from '@/components/Pagination'
 
@@ -238,17 +243,20 @@ export default {
         isAsc: true
       },
       statusList: [
-        {
-          key: '启用',
-          value: 1
-        },
-        {
-          key: '禁用',
-          value: 0
-        }
+        { key: '启用', value: 1 },
+        { key: '禁用', value: 0 }
       ],
       form: {
-        id: undefined
+        id: undefined,
+        name: '',
+        // group: 'DEFAULT',
+        beanName: '',
+        params: '',
+        cron: '',
+        allowConcurrent: false,
+        misfirePolicy: 0,
+        memo: '',
+        status: 1
       },
       rules: {
         name: [{ required: true, message: '任务名称不能为空', trigger: 'blur' }],
@@ -281,13 +289,28 @@ export default {
   mounted() {},
   methods: {
     getList() {
+      this.loading = true
       page(this.queryParams).then(res => {
         this.list = res.data
         this.total = Number(res.total)
+
+        setTimeout(() => {
+          this.loading = false
+        }, 1000)
       })
     },
     resetQueryForm() {
-      this.queryParams.keyword = ''
+      if (this.$refs['queryForm']) {
+        this.$refs['queryForm'].resetFields()
+      }
+      this.queryParams = {
+        keyword: undefined,
+        pageIndex: 1,
+        pageSize: 10,
+        orderField: undefined,
+        isAsc: true
+      }
+      this.getList()
     },
     query() {
       this.getList()
@@ -297,32 +320,46 @@ export default {
       this.isSave = true
       this.dialogVisible = true
     },
+    handleRun(row) {
+      run(row.id).then(res => {
+        if (res.code === 0) {
+          this.$message({
+            showClose: true,
+            message: '执行成功',
+            type: 'success',
+            duration: 3 * 1000
+          })
+        }
+      })
+    },
     handleEdit(row) {
       this.resetForm()
       this.isSave = false
-      this.dialogVisible = true
       get(row.id).then(res => {
         if (res.code === 0) {
           this.form = res.data
+          this.dialogVisible = true
         }
       })
     },
     submitForm() {
       this.$refs['form'].validate(valid => {
-        if (this.isSave) {
-          save(this.form).then(res => {
-            if (res.code === 0) {
-              this.dialogVisible = false
-              this.getList()
-            }
-          })
-        } else {
-          update(this.form).then(res => {
-            if (res.code === 0) {
-              this.dialogVisible = false
-              this.getList()
-            }
-          })
+        if (valid) {
+          if (this.isSave) {
+            save(this.form).then(res => {
+              if (res.code === 0) {
+                this.dialogVisible = false
+                this.getList()
+              }
+            })
+          } else {
+            update(this.form).then(res => {
+              if (res.code === 0) {
+                this.dialogVisible = false
+                this.getList()
+              }
+            })
+          }
         }
       })
     },
@@ -340,6 +377,18 @@ export default {
     resetForm() {
       if (this.$refs['form']) {
         this.$refs['form'].resetFields()
+      }
+      this.form = {
+        id: undefined,
+        name: '',
+        // group: 'DEFAULT',
+        beanName: '',
+        params: '',
+        cron: '',
+        allowConcurrent: true,
+        misfirePolicy: 0,
+        memo: '',
+        status: 1
       }
     },
     handleBatchDelete() {

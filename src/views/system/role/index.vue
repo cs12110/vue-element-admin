@@ -36,7 +36,7 @@
             <el-table-column align="center" prop="updatedAt" label="更新时间" show-overflow-tooltip sortable="custom">
               <template slot-scope="{row}">{{ row.updatedAt || '-' }}</template>
             </el-table-column>
-            <el-table-column align="center" label="操作">
+            <el-table-column align="center" width="150px" label="操作">
               <template slot-scope="scope">
                 <div class="operate-container">
                   <el-link v-permission="['system:role:edit']" class="operate-item" icon="el-icon-edit" @click="handleEdit(scope.row)">编辑</el-link>
@@ -57,8 +57,8 @@
         />
       </el-footer>
     </el-container>
-    <el-dialog :visible.sync="dialogVisible" width="600px" append-to-body>
-      <el-form ref="form" :model="form" :rules="rules" label-width="60px">
+    <el-dialog :visible.sync="dialogVisible" width="600px" :close-on-click-modal="false" append-to-body>
+      <el-form ref="form" :model="form" :rules="rules" label-width="70px">
         <el-row>
           <el-col :span="24">
             <el-form-item label="角色名" prop="name">
@@ -128,7 +128,11 @@ export default {
         memo: '',
         resourceIds: []
       },
-      rules: {},
+      rules: {
+        name: [
+          { required: true, message: '角色名不能为空', trigger: 'blur' }
+        ]
+      },
       defaultProps: {
         children: 'children',
         label: 'name'
@@ -235,7 +239,6 @@ export default {
     submitForm() {
       this.$refs['form'].validate(valid => {
         if (valid) {
-          debugger
           this.form.resourceIds = this.$refs['tree'].getCheckedKeys()
           if (this.isSave) {
             save(this.form).then(res => {
