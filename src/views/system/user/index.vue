@@ -3,7 +3,7 @@
     <el-container>
       <el-header style="display: flex;">
         <div class="filter-container" style="flex: 1;">
-          <el-form ref="queryForm">
+          <el-form ref="queryForm" @submit.native.prevent>
             <el-form-item class="filter-item">
               <el-input v-model="queryParams.keyword" placeholder="请输入用户名" clearable @keyup.enter.native="getList()" />
             </el-form-item>
@@ -153,7 +153,7 @@ export default {
     statusFilter(status) {
       const statusMap = {
         0: 'danger',
-        1: 'primary'
+        1: 'success'
       }
       return statusMap[status]
     }
