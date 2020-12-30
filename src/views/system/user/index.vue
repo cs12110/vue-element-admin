@@ -237,9 +237,7 @@ export default {
         this.list = res.data
         this.total = Number(res.total)
 
-        setTimeout(() => {
-          this.loading = false
-        }, 1000)
+        this.loading = false
       })
     },
     getRoleList() {

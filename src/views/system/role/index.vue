@@ -5,15 +5,32 @@
         <div class="filter-container" style="flex: 1;">
           <el-form ref="queryForm" @submit.native.prevent>
             <el-form-item class="filter-item">
-              <el-input v-model="queryParams.keyword" placeholder="请输入角色名" clearable @keyup.enter.native="getList()" />
+              <el-input
+                v-model="queryParams.keyword"
+                placeholder="请输入角色名"
+                clearable
+                @keyup.enter.native="getList()"
+              />
             </el-form-item>
             <el-button size="small" type="primary" @click="query">查 询</el-button>
             <el-button size="small" @click="resetQueryForm">重 置</el-button>
           </el-form>
         </div>
         <div class="action-container">
-          <el-button v-permission="['system:role:add']" class="action-item" size="small" type="primary" @click="handleAdd">添 加</el-button>
-          <el-button v-permission="['system:role:delete']" class="action-item" size="small" type="danger" @click="handleBatchDelete">删 除</el-button>
+          <el-button
+            v-permission="['system:role:add']"
+            class="action-item"
+            size="small"
+            type="primary"
+            @click="handleAdd"
+          >添 加</el-button>
+          <el-button
+            v-permission="['system:role:delete']"
+            class="action-item"
+            size="small"
+            type="danger"
+            @click="handleBatchDelete"
+          >删 除</el-button>
         </div>
       </el-header>
       <el-main>
@@ -32,15 +49,37 @@
             <el-table-column align="center" :reserve-selection="true" type="selection" width="50" />
             <el-table-column align="center" prop="name" label="角色名" show-overflow-tooltip />
             <el-table-column align="center" prop="memo" label="备注" show-overflow-tooltip />
-            <el-table-column align="center" prop="createdAt" label="创建时间" show-overflow-tooltip sortable="custom" />
-            <el-table-column align="center" prop="updatedAt" label="更新时间" show-overflow-tooltip sortable="custom">
-              <template slot-scope="{row}">{{ row.updatedAt || '-' }}</template>
+            <el-table-column
+              align="center"
+              prop="createdAt"
+              label="创建时间"
+              show-overflow-tooltip
+              sortable="custom"
+            />
+            <el-table-column
+              align="center"
+              prop="updatedAt"
+              label="更新时间"
+              show-overflow-tooltip
+              sortable="custom"
+            >
+              <template slot-scope="{ row }">{{ row.updatedAt || '-' }}</template>
             </el-table-column>
             <el-table-column align="center" width="150px" label="操作">
               <template slot-scope="scope">
                 <div class="operate-container">
-                  <el-link v-permission="['system:role:edit']" class="operate-item" icon="el-icon-edit" @click="handleEdit(scope.row)">编辑</el-link>
-                  <el-link v-permission="['system:role:delete']" class="operate-item" icon="el-icon-delete" @click="handleDelete(scope.row)">删除</el-link>
+                  <el-link
+                    v-permission="['system:role:edit']"
+                    class="operate-item"
+                    icon="el-icon-edit"
+                    @click="handleEdit(scope.row)"
+                  >编辑</el-link>
+                  <el-link
+                    v-permission="['system:role:delete']"
+                    class="operate-item"
+                    icon="el-icon-delete"
+                    @click="handleDelete(scope.row)"
+                  >删除</el-link>
                 </div>
               </template>
             </el-table-column>
@@ -57,7 +96,12 @@
         />
       </el-footer>
     </el-container>
-    <el-dialog :visible.sync="dialogVisible" width="600px" :close-on-click-modal="false" append-to-body>
+    <el-dialog
+      :visible.sync="dialogVisible"
+      width="600px"
+      :close-on-click-modal="false"
+      append-to-body
+    >
       <el-form ref="form" :model="form" :rules="rules" label-width="70px">
         <el-row>
           <el-col :span="24">
@@ -88,7 +132,12 @@
         </el-row>
       </el-form>
       <div slot="footer">
-        <el-button v-permission="['system:role:add', 'system:role:edit']" type="primary" small @click="submitForm">确 定</el-button>
+        <el-button
+          v-permission="['system:role:add', 'system:role:edit']"
+          type="primary"
+          small
+          @click="submitForm"
+        >确 定</el-button>
         <el-button small @click="cancel">取 消</el-button>
       </div>
     </el-dialog>
@@ -129,9 +178,7 @@ export default {
         resourceIds: []
       },
       rules: {
-        name: [
-          { required: true, message: '角色名不能为空', trigger: 'blur' }
-        ]
+        name: [{ required: true, message: '角色名不能为空', trigger: 'blur' }]
       },
       defaultProps: {
         children: 'children',
@@ -145,17 +192,14 @@ export default {
   created() {
     this.getList()
   },
-  mounted() {
-  },
+  mounted() {},
   methods: {
     getList() {
       this.loading = true
       page(this.queryParams).then(res => {
         this.list = res.data
         this.total = Number(res.total)
-        setTimeout(() => {
-          this.loading = false
-        }, 1000)
+        this.loading = false
       })
     },
     query() {
@@ -262,7 +306,7 @@ export default {
       this.dialogVisible = false
     },
     findCheckedNodes(tree) {
-      tree.forEach((item) => {
+      tree.forEach(item => {
         if (item.hasPermission) {
           this.form.resourceIds.push(item.id)
         }

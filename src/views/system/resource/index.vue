@@ -70,7 +70,12 @@
         </el-card>
       </el-main>
     </el-container>
-    <el-dialog :visible.sync="dialogVisible" width="600px" :close-on-click-modal="false" append-to-body>
+    <el-dialog
+      :visible.sync="dialogVisible"
+      width="600px"
+      :close-on-click-modal="false"
+      append-to-body
+    >
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
         <el-row>
           <el-col :span="24">
@@ -82,7 +87,12 @@
                 clearable
                 @clear="handleSelectClear"
               >
-                <el-option key="parentId" hidden :value="form.parentId" :label="form.parentId === '0' ? '无' : form.parentName" />
+                <el-option
+                  key="parentId"
+                  hidden
+                  :value="form.parentId"
+                  :label="form.parentId === '0' ? '无' : form.parentName"
+                />
                 <el-tree
                   :data="list"
                   :props="defaultProps"
@@ -139,7 +149,12 @@
         </el-row>
       </el-form>
       <div slot="footer">
-        <el-button v-permission="['system:resource:add', 'system:resource:edit']" type="primary" small @click="submitForm">确 定</el-button>
+        <el-button
+          v-permission="['system:resource:add', 'system:resource:edit']"
+          type="primary"
+          small
+          @click="submitForm"
+        >确 定</el-button>
         <el-button small @click="cancel">取 消</el-button>
       </div>
     </el-dialog>
@@ -153,8 +168,7 @@ import permission from '@/directive/permission/index.js'
 export default {
   components: {},
   directives: { permission },
-  filters: {
-  },
+  filters: {},
   props: {},
   data() {
     return {
@@ -177,9 +191,7 @@ export default {
         sortNumber: 0
       },
       rules: {
-        name: [
-          { required: true, message: '名称不能为空', trigger: 'blur' }
-        ]
+        name: [{ required: true, message: '名称不能为空', trigger: 'blur' }]
       },
       typeOptions: [
         {
@@ -209,9 +221,7 @@ export default {
       list().then(res => {
         if (res.code === 0) {
           this.list = res.data
-          setTimeout(() => {
-            this.loading = false
-          }, 1000)
+          this.loading = false
         }
       })
     },
